@@ -1,2 +1,4 @@
 # hh
-JavaScript hh
+JavaScript hh  
+Исходник - разметка сайта hh.ru  
+Реализация функционала - JS
