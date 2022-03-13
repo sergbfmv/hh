@@ -10,12 +10,27 @@ const formSearch = document.querySelector(".bottom__search")
 const found = document.querySelector(".found")
 const overlayVacancy = document.querySelector(".overlay_vacancy")
 const resultList = document.querySelector(".result__list")
+const orderBy = document.querySelector("#order_by")
+const searchPeriod = document.querySelector("#search_period")
 
-const getData = ({search, id} = {}) => {
+let data = []
+
+const getData = ({search, id, city, country} = {}) => {
+  let url = `https://secret-mountain-35499.herokuapp.com/api/vacancy/${id ? id : ""}`
+  
   if (search) {
-    return fetch(` https://secret-mountain-35499.herokuapp.com/api/vacancy?search=${search}`).then(res => res.json())
+    url = ` https://secret-mountain-35499.herokuapp.com/api/vacancy?search=${search}`
   }
-  return fetch(` https://secret-mountain-35499.herokuapp.com/api/vacancy/${id ? id : ""}`).then(res => res.json())
+
+  if (city) {
+    url = `https://secret-mountain-35499.herokuapp.com/api/vacancy?city=${city}`
+  }
+
+  if (country) {
+    url = `https://secret-mountain-35499.herokuapp.com/api/vacancy?country=${country}`
+  }
+
+  return fetch(url).then(res => res.json())
 }
 
 const declOfNum = (n, titles) => {
@@ -67,6 +82,26 @@ function renderCards(data) {
   resultList.append(...cards)
 }
 
+function sortData() {
+  switch (orderBy.value) {
+    case 'down': 
+      data.sort((a, b) => a.minCompensation > b.minCompensation ? 1 : -1)
+      break
+    case 'up':
+      data.sort((a, b) => b.minCompensation > a.minCompensation ? 1 : -1)
+      break
+    default:
+      data.sort((a, b) => new Date(a.date).getTime() > new Date(b.date).getTime() ? 1 : -1)
+  }
+}
+
+function filterData() {
+  const date = new Date()
+  date.setDate(date.getDate() - searchPeriod.value)
+  
+  return data.filter(item => new Date(item.date).getTime() > date)
+}
+
 function optionHandler() {
   optionBtnOrder.addEventListener("click", () => {
     optionListOrder.classList.toggle("option__list_active")
@@ -83,6 +118,10 @@ function optionHandler() {
   
     if (target.classList.contains("option__item")) {
       optionBtnOrder.textContent = target.textContent
+      orderBy.value = target.dataset.sort
+      sortData()
+      filterData()
+      renderCards(data)
       optionListOrder.classList.remove("option__list_active")
   
       for (const elem of optionListOrder.querySelectorAll(".option__item")) {
@@ -100,6 +139,9 @@ function optionHandler() {
     
     if (target.classList.contains("option__item")) {
       optionBtnPeriod.textContent = target.textContent
+      searchPeriod.value = target.dataset.date
+      const tempData = filterData()
+      renderCards(tempData)
       optionListPeriod.classList.remove("option__list_active")
   
       for (const elem of optionListPeriod.querySelectorAll(".option__item")) {
@@ -122,10 +164,18 @@ function cityHandler() {
     city.classList.remove("city_active")
   })
   
-  cityRegionList.addEventListener("click", (e) => {
+  cityRegionList.addEventListener("click", async (e) => {
     const target = e.target
   
     if (target.classList.contains("city__link")) {
+      const hash = new URL(target.href).hash.substring(1)
+      const option = {
+        [hash]: target.textContent,
+      }
+      data = await getData(option)
+      sortData()
+      filterData()
+      renderCards(data)
       topCityBtn.textContent = target.textContent
       city.classList.remove("city_active")
     }
@@ -250,7 +300,9 @@ function searchHandler() {
   
     if (textSearch.length > 2) {
       formSearch.search.style.borderColor = ""
-      const data = await getData({search: textSearch})
+      data = await getData({search: textSearch})
+      sortData()
+      filterData()
       found.innerHTML = `${declOfNum(data.length, ["вакансия", "вакансии", "вакансий"])} &laquo;${textSearch}&raquo;`
       renderCards(data)
       formSearch.reset()
@@ -264,7 +316,9 @@ function searchHandler() {
 }
 
 const init = async () => {
-  const data = await getData()
+  data = await getData()
+  sortData()
+  data = filterData()
   renderCards(data)
 
   optionHandler()
