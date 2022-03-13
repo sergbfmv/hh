@@ -13,9 +13,9 @@ const resultList = document.querySelector(".result__list")
 
 const getData = ({search, id} = {}) => {
   if (search) {
-    return fetch(`http://localhost:3000/api/vacancy?search=${search}`).then(res => res.json())
+    return fetch(` https://secret-mountain-35499.herokuapp.com/api/vacancy?search=${search}`).then(res => res.json())
   }
-  return fetch(`http://localhost:3000/api/vacancy/${id ? id : ""}`).then(res => res.json())
+  return fetch(` https://secret-mountain-35499.herokuapp.com/api/vacancy/${id ? id : ""}`).then(res => res.json())
 }
 
 const declOfNum = (n, titles) => {
