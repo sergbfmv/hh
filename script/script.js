@@ -16,18 +16,19 @@ const searchPeriod = document.querySelector("#search_period")
 let data = []
 
 const getData = ({search, id, city, country} = {}) => {
-  let url = `https://secret-mountain-35499.herokuapp.com/api/vacancy/${id ? id : ""}`
+  const URL = "https://agile-sands-24496.herokuapp.com/api/vacancy"
+  let url = `${URL}/${id ? id : ""}`
   
   if (search) {
-    url = ` https://secret-mountain-35499.herokuapp.com/api/vacancy?search=${search}`
+    url = `${URL}?search=${search}`
   }
 
   if (city) {
-    url = `https://secret-mountain-35499.herokuapp.com/api/vacancy?city=${city}`
+    url = `${URL}?city=${city}`
   }
 
   if (country) {
-    url = `https://secret-mountain-35499.herokuapp.com/api/vacancy?country=${country}`
+    url = `${URL}?country=${country}`
   }
 
   return fetch(url).then(res => res.json())
